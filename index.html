@@ -1,125 +1,107 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Consulta DNI - API Perú</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      width: 380px;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin: 5px 0;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #007bff;
-      color: white;
-      cursor: pointer;
-      border: none;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    .resultado {
-      margin-top: 15px;
-      padding: 10px;
-      background: #eef;
-      border-radius: 5px;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h2>Consulta DNI</h2>
-    <input type="text" id="dni" placeholder="Ingrese DNI (8 dígitos)">
-    <button onclick="consultarDNI()">Buscar</button>
-    <div id="resultado" class="resultado"></div>
-  </div>
-
-  <script>
-    function calcularEdad(fecha) {
-      const hoy = new Date();
-      const nacimiento = new Date(fecha);
-      let edad = hoy.getFullYear() - nacimiento.getFullYear();
-      const m = hoy.getMonth() - nacimiento.getMonth();
-      if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
-        edad--;
-      }
-      return edad;
-    }
-
-    async function consultarDNI() {
-      const dni = document.getElementById("dni").value.trim();
-      const resultado = document.getElementById("resultado");
-
-      if (!/^\d{8}$/.test(dni)) {
-        resultado.innerHTML = "⚠️ El DNI debe contener exactamente 8 números.";
-        return;
-      }
-
-      try {
-        const response = await fetch(`https://apiperu.dev/api/dni/${dni}`, {
-          headers: {
-            "Authorization": "Bearer TU_TOKEN_AQUI" // 🔑 coloca aquí tu token real
-          }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          const persona = data.data;
-          let edadTexto = persona.fecha_nacimiento 
-            ? calcularEdad(persona.fecha_nacimiento) + " años" 
-            : "No disponible";
-
-          // Mostrar en pantalla
-          resultado.innerHTML = `
-            DNI: ${persona.numero}<br>
-            Nombre: ${persona.nombre_completo}<br>
-            Fecha de Nacimiento: ${persona.fecha_nacimiento || "No disponible"}<br>
-            Edad: ${edadTexto}
-          `;
-
-          // Guardar en consultas.txt
-          fetch("guardar.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              dni: persona.numero,
-              nombre: persona.nombre_completo,
-              fecha_nacimiento: persona.fecha_nacimiento,
-              edad: edadTexto
-            })
-          })
-          .then(res => res.text())
-          .then(res => console.log(res))
-          .catch(err => console.error("Error al guardar:", err));
-
-        } else {
-          resultado.innerHTML = "❌ No se encontró información.";
-        }
-      } catch (error) {
-        resultado.innerHTML = "⚠️ Error en la consulta.";
-        console.error(error);
-      }
-    }
-  </script>
-</body>
+<!DOCTYPE html>  <html lang="es">  
+<head>  
+  <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <title>Consulta DNI - API Perú</title>  
+  <style>  
+    body {  
+      font-family: Arial, sans-serif;  
+      background: #f4f4f9;  
+      display: flex;  
+      justify-content: center;  
+      align-items: center;  
+      height: 100vh;  
+    }  
+    .card {  
+      background: white;  
+      padding: 20px;  
+      border-radius: 10px;  
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);  
+      width: 380px;  
+    }  
+    input, button {  
+      width: 100%;  
+      padding: 10px;  
+      margin: 5px 0;  
+      font-size: 16px;  
+      border-radius: 5px;  
+      border: 1px solid #ccc;  
+    }  
+    button {  
+      background: #007bff;  
+      color: white;  
+      cursor: pointer;  
+      border: none;  
+    }  
+    button:hover {  
+      background: #0056b3;  
+    }  
+    .resultado {  
+      margin-top: 15px;  
+      padding: 10px;  
+      background: #eef;  
+      border-radius: 5px;  
+    }  
+  </style>  
+</head>  
+<body>  
+  <div class="card">  
+    <h2>Consulta DNI</h2>  
+    <input type="text" id="dni" placeholder="Ingrese DNI (8 dígitos)">  
+    <button onclick="consultarDNI()">Buscar</button>  
+    <div id="resultado" class="resultado"></div>  
+  </div>    <script>  
+    function calcularEdad(fecha) {  
+      const hoy = new Date();  
+      const nacimiento = new Date(fecha);  
+      let edad = hoy.getFullYear() - nacimiento.getFullYear();  
+      const m = hoy.getMonth() - nacimiento.getMonth();  
+      if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {  
+        edad--;  
+      }  
+      return edad;  
+    }  
+  
+    async function consultarDNI() {  
+      const dni = document.getElementById("dni").value;  
+      const resultado = document.getElementById("resultado");  
+  
+      if (dni.length !== 8) {  
+        resultado.innerHTML = "⚠️ El DNI debe tener 8 dígitos.";  
+        return;  
+      }  
+  
+      try {  
+        const response = await fetch(`https://apiperu.dev/api/dni/${dni}`, {  
+          headers: {  
+            "Authorization": "Bearer b9141f05d30e4445a783b8d1d618b83fad2ce68c2acbb737b7bf9f6a7f3638ae" // 🔑 coloca aquí tu token real  
+          }  
+        });  
+  
+        const data = await response.json();  
+  
+        if (data.success) {  
+          const persona = data.data;  
+          let edadTexto = persona.fecha_nacimiento ? calcularEdad(persona.fecha_nacimiento) + " años" : "No disponible";  
+  
+          resultado.innerHTML = `  
+            <b>DNI:</b> ${persona.numero}<br>  
+            <b>CUI:</b> ${persona.cui || "No disponible"}<br>  
+            <b>Nombres:</b> ${persona.nombres}<br>  
+            <b>Apellido Paterno:</b> ${persona.apellido_paterno}<br>  
+            <b>Apellido Materno:</b> ${persona.apellido_materno}<br>  
+            <b>Nombre Completo:</b> ${persona.nombre_completo}<br>  
+            <b>Sexo:</b> ${persona.sexo || "No disponible"}<br>  
+            <b>Fecha de Nacimiento:</b> ${persona.fecha_nacimiento || "No disponible"}<br>  
+            <b>Edad:</b> ${edadTexto}  
+          `;  
+        } else {  
+          resultado.innerHTML = "❌ No se encontró información.";  
+        }  
+      } catch (error) {  
+        resultado.innerHTML = "⚠️ Error en la consulta.";  
+        console.error(error);  
+      }  
+    }  
+  </script>  </body>  
 </html>
